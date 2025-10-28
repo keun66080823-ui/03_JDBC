@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class JDBCExample1 {
-
+// 2025-10-28 화요일 강의 시작
 	public static void main(String[] args) {
 		
 		/* JDBC (Java Database Connectivity)
