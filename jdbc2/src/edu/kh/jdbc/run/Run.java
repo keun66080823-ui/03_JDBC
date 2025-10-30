@@ -8,6 +8,10 @@ public class Run {
 		
 		UserView view = new UserView();
 //		view.test();
+		view.mainMenu();
+		
+		
+		
 		
 	}
 
