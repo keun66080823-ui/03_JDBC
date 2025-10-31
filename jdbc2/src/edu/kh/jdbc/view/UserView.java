@@ -83,8 +83,40 @@ public class UserView {
 		
 	}
 
-	private void updateName() {
-		// TODO Auto-generated method stub
+	/** 6. ID, PW가 일치하는 회원이 있을(SELECT) 경우 이름 수정(UPDATE)
+	 *  id와 pw는 select로 조회하고, 조건에 맞게 update 해야 한다.
+	 */
+	private void updateName() throws Exception{
+		
+		System.out.println("\n====6. ID, PW가 일치하는 회원의 이름 수정====\n");
+		
+		System.out.print("ID : ");
+		String userId = sc.next();
+		
+		System.out.print("PW : ");
+		String userPw = sc.next();
+		
+		// 입력받은 ID, PW 가 일치하는 회원이 존재하는지 조회(SELECT)
+		// -> 수정할 때 필요한 데이터 USER_NO 조회해오기.
+		int userNo = service.selectUserNo(userId, userPw);
+		
+		// 조회 결과가 없을 때
+		if(userNo == 0) {
+			System.out.println("아이디, 비밀번호가 일치하는 사용자가 없음");
+			return;
+		}
+		
+		// 조회 결과가 있을 때
+		System.out.print("수정할 이름 입력 : ");
+		String name = sc.next();
+		
+		// 위에서 조회된 회원(userNo)의 이름을 수정
+		// 이름을 수정하는 서비스 호출(UPDATE) 후 결과 반환(int) 받기
+		int result = service.updateName(name, userNo);
+		
+		if(result > 0) System.out.println("수정 성공!!!");
+		else		   System.out.println("수정 실패...");
+		
 		
 	}
 
@@ -98,20 +130,13 @@ public class UserView {
 	private void deleteUser() throws Exception{
 		System.out.println("\n====5. USER_NO를 입력 받아 일치하는 User 삭제====\n");
 		
-		System.out.print("USER_NO 입력 : ");
+		System.out.print("삭제할 사용자 번호 입력 : ");
 		int keyNum = sc.nextInt();
-		
-		User user = new User();
-		
+		// 삭제할 행의 갯수가 와야 하므로 int로 받아야 한다.
 		int result = service.deleteUser(keyNum);
 		
-		if(user == null) {
-			System.out.println("USER_NO가 일치하는 USER가 없습니다");
-			return;
-		}else {
-			System.out.println("삭제 성공");
-		}
-		
+		if(result > 0) System.out.println("삭제 성공");
+		else 		   System.out.println("사용자 번호가 일치하는 USER가 없습니다");
 		
 	}
 
@@ -124,13 +149,16 @@ public class UserView {
 	private void selectUser() throws Exception{
 		System.out.println("\n====4. USER_NO를 입력 받아 일치하는 User 조회====\n");
 		
-		System.out.print("USER_NO 입력 : ");
+		System.out.print("사용자 번호 입력 : ");
 		int keyNum = sc.nextInt();
 		
-		User user = new User();
+		// service 호출 후 결과 반환받기
+		// USER_NO (PK) == 중복이 있을 수 없다!
+		// == 일치하는 사용자가 있다면 딱 1행만 조회된다
+		// -> 1행의 조회 결과를 담기 위해서 User DTO 객체 1개 사용
+		User user = service.selectUser(keyNum);
 		
-		user = service.selectUser(keyNum);
-		
+		// 조회 결과가 없으면 null, 있으면 null이 아님
 		if(user == null) {
 			System.out.println("USER_NO가 일치하는 회원 없음");
 			return;

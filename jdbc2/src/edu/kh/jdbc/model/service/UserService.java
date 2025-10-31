@@ -77,7 +77,7 @@ public class UserService {
 		return searchList;
 	}
 
-	/** 4. USER_NO을 입력받아 일치하는 User 조회
+	/** 4. USER_NO를 입력받아 일치하는 User 조회 서비스
 	 * @param keyNum : 입력받은 USER_NO
 	 * @return result : 조회된 회원 1명
 	 */
@@ -95,29 +95,56 @@ public class UserService {
 	/** 5. USER_NO를 입력 받아 일치하는 User 삭제
 	 * @param keyNum
 	 * @return
-	 * @throws Exception
 	 */
 	public int deleteUser(int keyNum) throws Exception{
 		
-		// 1. 커넥션 생성
 		Connection conn = JDBCTemplate.getConnection();
 		
-		// 2. DAO 메서드 호출 후 결과 반환받기
 		int result = dao.deleteUser(conn, keyNum);
 		
-		// 3. DML(DELETE) 수행 결과에 따라 트랜잭션 제어 처리
-		if(result>0) { // DELETE 성공
-			JDBCTemplate.commit(conn);
-			
-		} else { // DELETE 실패
-			JDBCTemplate.rollback(conn);
-			
+		if(result>0) { // DELETE 성공하면 커밋
+			JDBCTemplate.commit(conn);			
+		} else { // DELETE 실패하면 롤백
+			JDBCTemplate.rollback(conn);	
 		}
 		
-		// 4. Connection 반환하기
 		JDBCTemplate.close(conn);
 		
-		// 5. 결과 반환
+		return result;
+	}
+
+	/** 6-1. ID, PW가 일치하는 회원이 있는지 조회(SELECT)
+	 * @param userId
+	 * @param userPw
+	 * @return
+	 */
+	public int selectUserNo(String userId, String userPw) throws Exception{
+		
+		Connection conn = JDBCTemplate.getConnection();
+		
+		int userNo = dao.selectUser(conn, userId, userPw);
+		
+		JDBCTemplate.close(conn);
+		
+		return userNo;
+	}
+
+	/** 6-2. USER_NO가 일치하는 회원의 이름 수정 서비스(UPDATE)
+	 * @param name
+	 * @param userNo
+	 * @return
+	 */
+	public int updateName(String name, int userNo) throws Exception {
+		
+		Connection conn = JDBCTemplate.getConnection();
+		
+		int result = dao.updateName(conn, name, userNo);
+		
+		if(result > 0) JDBCTemplate.commit(conn);
+		else		   JDBCTemplate.rollback(conn);
+		
+		JDBCTemplate.close(conn);
+		
 		return result;
 	}
 	

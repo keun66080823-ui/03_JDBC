@@ -173,23 +173,23 @@ public class UserDAO {
 		return searchList;
 	}
 
-	/** 4. USER_NO을 입력받아 일치하는 회원 조회용
+	/** 4. USER_NO을 입력받아 일치하는 회원 조회용 DAO
 	 * @param conn
 	 * @param keyNum
-	 * @return result
+	 * @return 
 	 */
 	public User selectUser(Connection conn, int keyNum) throws Exception{
 		
 		User user = null;
 		
 		try {
-			
 			String sql = """
 					SELECT USER_NO, USER_ID, USER_PW, USER_NAME,
 					TO_CHAR(ENROLL_DATE, 'YYYY"년" MM"월" DD"일"') ENROLL_DATE
 					FROM TB_USER 
 					WHERE USER_NO = ?
 					""";
+			
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setInt(1, keyNum);
@@ -197,6 +197,7 @@ public class UserDAO {
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()) {
+				
 				int userNo = rs.getInt("USER_NO");
 				String userId = rs.getString("USER_ID");
 				String userPw = rs.getString("USER_PW");
@@ -204,6 +205,7 @@ public class UserDAO {
 				String enrollDate = rs.getString("ENROLL_DATE");
 				
 				user = new User(userNo, userId, userPw, userName, enrollDate);
+			
 			}
 			
 		} finally {
@@ -224,22 +226,94 @@ public class UserDAO {
 		int result = 0;
 		
 		try {
-			// SQL 작성
 			String sql = """
 					DELETE FROM TB_USER
 					WHERE USER_NO = ?
 					""";
 			// PreparedStatement 객체 생성
 			pstmt = conn.prepareStatement(sql);
-			
 			// '?' 위치홀더에 알맞은 값 대입
 			pstmt.setInt(1, keyNum);
-			
-			// SQL 수행
+			// SQL 수행 - DML이면 executeUpdate
 			result = pstmt.executeUpdate();
 			
 		} finally {
 			close(pstmt);
+			
+		}
+		
+		return result;
+	}
+
+	/** 6-1. ID, PW가 일치하는 회원의 USER_NO 조회 DAO
+	 * @param conn
+	 * @param userId
+	 * @param userPw
+	 * @return
+	 */
+	public int selectUser(Connection conn, String userId, String userPw)
+			throws Exception{
+		
+		int userNo = 0;
+		
+		try {
+			String sql = """
+					SELECT USER_NO
+					FROM TB_USER
+					WHERE USER_ID = ?
+					AND USER_PW = ?
+					""";
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, userId);
+			pstmt.setString(2, userPw);
+			
+			rs = pstmt.executeQuery();
+			
+			// 조회된 행이 1개가 있을 경우
+			if(rs.next()) {
+				userNo = rs.getInt("USER_NO");
+			}
+			
+			
+		} finally {
+			close(rs);
+			close(pstmt);
+		}
+		
+		return userNo; // 조회 성공 시 USER_NO, 실패 시 0 반환(초기 userNo를 0으로 지정했기에) 
+	}
+
+	/** 6-2. USER_NO가 일치하는 회원의 이름 수정 DAO
+	 * @param conn
+	 * @param name
+	 * @param userNo
+	 * @return
+	 */
+	public int updateName(Connection conn, String name, int userNo) 
+													throws Exception{
+		
+		int result = 0;
+		
+		try {
+			String sql = """
+					UPDATE TB_USER
+					SET USER_NAME = ?
+					WHERE USER_NO = ?
+					""";
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, name);
+			pstmt.setInt(2, userNo);
+			
+			result = pstmt.executeUpdate();
+			
+			
+		} finally {
+			close(pstmt);
+			
 		}
 		
 		return result;
